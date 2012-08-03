@@ -3,6 +3,7 @@ import os
 import posixpath
 import re
 import warnings
+import logging
 
 from datetime import datetime
 from urllib import unquote
@@ -22,6 +23,9 @@ from django.utils.importlib import import_module
 from django.utils.hashcompat import md5_constructor
 
 from staticfiles.utils import matches_patterns
+
+
+log = logging.getLogger(__name__)
 
 
 def setattr_ifmissing(clss, name, func):
@@ -215,6 +219,7 @@ class CachedFilesMixin(object):
             except ValueError:
                 if not fail_silently:
                     raise
+                log.exception("Ignoring failure during url conversion")
                 hashed_url = url
             # Return the hashed and normalized version to the file
             return 'url("%s")' % unquote(hashed_url)
