@@ -1,5 +1,6 @@
 from __future__ import with_statement
 
+import logging
 import os
 import sys
 from optparse import make_option
@@ -11,6 +12,8 @@ from django.utils.datastructures import SortedDict
 
 from staticfiles import finders, storage
 from staticfiles.conf import settings
+
+log = logging.getLogger(__name__)
 
 
 class Command(NoArgsCommand):
@@ -116,7 +119,12 @@ class Command(NoArgsCommand):
                 # Process only not already processed files.
                 if prefixed_path not in found_files:
                     found_files[prefixed_path] = (storage, path)
-                    handler(path, prefixed_path, storage)
+                    try:
+                        handler(path, prefixed_path, storage)
+                    except:
+                        if not self.fail_silently:
+                            raise
+                        log.exception("Ignoring error during file handling")
 
         # Here we check if the storage backend has a post_process
         # method and pass it the list of modified files.
